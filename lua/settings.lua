@@ -11,6 +11,8 @@ opt.expandtab = true
 opt.shiftwidth = 2
 opt.softtabstop = -1
 opt.tabstop = 4
+opt.backspace = {"indent" , "eol" , "start"}
+opt.scrolloff = 1
 
 opt.linebreak = true
 opt.breakindent = true
@@ -40,6 +42,8 @@ opt.foldenable = true
 opt.foldcolumn = "1"
 opt.foldlevel = 99
 
+opt.completeopt = {"menu"}
+
 api.nvim_create_autocmd("FileType", {
   pattern = "org",
   callback = function()
@@ -47,6 +51,26 @@ api.nvim_create_autocmd("FileType", {
   end
 })
 
-api.nvim_create_autocmd('TextYankPost', {
+api.nvim_create_autocmd("TextYankPost", {
   callback = function() vim.highlight.on_yank() end
+})
+
+api.nvim_create_autocmd("BufRead", {
+  callback = function(opts)
+    vim.api.nvim_create_autocmd("BufWinEnter", {
+      once = true,
+      buffer = opts.buf,
+      callback = function()
+        local ft = vim.bo[opts.buf].filetype
+        local last_known_line = vim.api.nvim_buf_get_mark(opts.buf, '"')[1]
+        if
+          not (ft:match("commit") and ft:match("rebase"))
+          and last_known_line > 1
+          and last_known_line <= vim.api.nvim_buf_line_count(opts.buf)
+        then
+            vim.api.nvim_feedkeys('g`"', "nx", false)
+        end
+      end
+    })
+  end
 })

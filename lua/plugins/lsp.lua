@@ -7,6 +7,10 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end
 })
 
+lspconfig.ocamllsp.setup({
+  on_attach=require'virtualtypes'.on_attach
+})
+
 lspconfig.lua_ls.setup({
   settings = {
     Lua = {
